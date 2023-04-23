@@ -27,6 +27,10 @@ p, ul {
   margin: 0 0 30px 0;
 }
 
+header {
+  text-align: right;
+}
+
 h1 {
   font: bold italic 50px Georgia;
   margin: 0 0 60px 0;
@@ -108,7 +112,11 @@ a {
     };
   </script>
 </head><body>
-  <h1>WebGL Path Tracing</h1>
+  <header>
+    <p><a href="https://github.com/steren/webgl-path-tracing">GitHub</a></p>
+  </header>
+
+  <h1>WebGL Path Tracing</h1> 
 
   <p>Path tracing is a realistic lighting algorithm that simulates light bouncing around a scene.&nbsp; This path tracer uses WebGL for realtime performance and supports diffuse, mirrored, and glossy surfaces.&nbsp; The path tracer is continually rendering, so the scene will start off grainy and become smoother over time.&nbsp; Here's how to interact with it:</p>
 
@@ -161,5 +169,9 @@ a {
   </div>
 
   <p>The entire scene is dynamically compiled into a GLSL shader.&nbsp; Everything can be repositioned using the current shader, but any geometry or material change means a recompilation.&nbsp; To calculate a pixel color, a ray is shot into the scene and allowed to bounce around five times.&nbsp; At each bounce, the direct light incoming at that point (including shadows) is multiplied by all previous material colors and accumulated.&nbsp; Soft shadows are achieved by randomly jittering the light position per-pixel.&nbsp; The path tracing solution will only completely converge if your browser supports the OES_texture_float extension.</p>
-  <p id="footer">Made by <a href="/">Evan Wallace</a> in 2010</p>
+  <p id="footer">
+    Made by <a href="https://madebyevan.com/">Evan Wallace</a> in 2010
+    <br>
+    Updated by <a href="https://steren.fr">Steren</a> in 2023
+  </p>
 </body></html>
