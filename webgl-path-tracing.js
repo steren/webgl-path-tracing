@@ -996,7 +996,7 @@ function tick(timeSinceStart) {
   ui.render();
 }
 
-function makePathTracer(canvas, log, objects, {material = 0, environment = 0}) {
+function makePathTracer(canvas, objects, {material = 0, environment = 0}, log) {
   nextObjectId = objects.length + 1;
 
   log = log || console.log;
