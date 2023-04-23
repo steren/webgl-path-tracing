@@ -1,4 +1,4 @@
-import { Matrix, Vector, $V, $M } from './sylvester.src.js';
+import { Matrix, Vector, $V, $M } from 'sylvester';
 
 // augment Sylvester some
 Matrix.Translation = function (v)
