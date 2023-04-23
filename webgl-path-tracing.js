@@ -28,9 +28,24 @@
 
 import {Vector, Matrix, makeLookAt, makeOrtho, makePerspective, makeFrustum} from 'glUtils';
 
+function closestPowerOfTwo(num) {
+  // If num is already a power of two, return num
+  if ((num & (num - 1)) === 0) {
+    return num;
+  }
+
+  // Find the nearest power of two greater than num
+  let power = 1;
+  while (power < num) {
+    power *= 2;
+  }
+
+  return power;
+}
+
 var canvasWidth = 512;
 var canvasHeight = 512;
-var canvasSize = Math.max(canvasWidth, canvasHeight);
+var renderSize = closestPowerOfTwo(Math.max(canvasWidth, canvasHeight));
 
 ////////////////////////////////////////////////////////////////////////////////
 // shader strings
@@ -289,7 +304,7 @@ function makeMain() {
   return '' +
 ' void main() {' +
 '   vec3 newLight = light + uniformlyRandomVector(timeSinceStart - 53.0) * ' + lightSize + ';' +
-'   vec3 texture = texture2D(texture, gl_FragCoord.xy / ' + canvasSize + '.0).rgb;' +
+'   vec3 texture = texture2D(texture, gl_FragCoord.xy / ' + renderSize + '.0).rgb;' +
 '   gl_FragColor = vec4(mix(calculateColor(eye, initialRay, newLight), texture, textureWeight), 1.0);' +
 ' }';
 }
@@ -678,7 +693,7 @@ function PathTracer() {
     gl.bindTexture(gl.TEXTURE_2D, this.textures[i]);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, canvasWidth, canvasHeight, 0, gl.RGB, type, null);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, renderSize, renderSize, 0, gl.RGB, type, null);
   }
   gl.bindTexture(gl.TEXTURE_2D, null);
 
@@ -796,7 +811,7 @@ Renderer.prototype.setObjects = function(objects) {
 };
 
 Renderer.prototype.update = function(modelviewProjection, timeSinceStart) {
-  var jitter = Matrix.Translation(Vector.create([Math.random() * 2 - 1, Math.random() * 2 - 1, 0]).multiply(1 / canvasSize));
+  var jitter = Matrix.Translation(Vector.create([Math.random() * 2 - 1, Math.random() * 2 - 1, 0]).multiply(1 / renderSize));
   var inverse = jitter.multiply(modelviewProjection).inverse();
   this.modelviewProjection = modelviewProjection;
   this.pathTracer.update(inverse, timeSinceStart);
