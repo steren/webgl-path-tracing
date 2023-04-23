@@ -1,5 +1,8 @@
+import {Sphere, Cube} from './webgl-path-tracing.js';
+
 function makeStacks() {
   var objects = [];
+  let nextObjectId = 0;
 
   // lower level
   objects.push(new Cube(Vector.create([-0.5, -0.75, -0.5]), Vector.create([0.5, -0.7, 0.5]), nextObjectId++));
@@ -27,6 +30,7 @@ function makeStacks() {
 
 function makeTableAndChair() {
   var objects = [];
+  let nextObjectId = 0;
 
   // table top
   objects.push(new Cube(Vector.create([-0.5, -0.35, -0.5]), Vector.create([0.3, -0.3, 0.5]), nextObjectId++));
@@ -59,6 +63,7 @@ function makeTableAndChair() {
 
 function makeSphereAndCube() {
   var objects = [];
+  let nextObjectId = 0;
   objects.push(new Cube(Vector.create([-0.25, -1, -0.25]), Vector.create([0.25, -0.75, 0.25]), nextObjectId++));
   objects.push(new Sphere(Vector.create([0, -0.75, 0]), 0.25, nextObjectId++));
   return objects;
@@ -66,6 +71,7 @@ function makeSphereAndCube() {
 
 function makeSphereColumn() {
   var objects = [];
+  let nextObjectId = 0;
   objects.push(new Sphere(Vector.create([0, 0.75, 0]), 0.25, nextObjectId++));
   objects.push(new Sphere(Vector.create([0, 0.25, 0]), 0.25, nextObjectId++));
   objects.push(new Sphere(Vector.create([0, -0.25, 0]), 0.25, nextObjectId++));
@@ -75,6 +81,7 @@ function makeSphereColumn() {
 
 function makeCubeAndSpheres() {
   var objects = [];
+  let nextObjectId = 0;
   objects.push(new Cube(Vector.create([-0.25, -0.25, -0.25]), Vector.create([0.25, 0.25, 0.25]), nextObjectId++));
   objects.push(new Sphere(Vector.create([-0.25, 0, 0]), 0.25, nextObjectId++));
   objects.push(new Sphere(Vector.create([+0.25, 0, 0]), 0.25, nextObjectId++));
@@ -90,6 +97,7 @@ function makeSpherePyramid() {
   var root3_over6 = 0.288675134594813;
   var root6_over6 = 0.408248290463863;
   var objects = [];
+  let nextObjectId = 0;
 
   // first level
   objects.push(new Sphere(Vector.create([-0.5, -0.75, -root3_over6]), 0.25, nextObjectId++));
@@ -112,22 +120,25 @@ function makeSpherePyramid() {
 
 var XNEG = 0, XPOS = 1, YNEG = 2, YPOS = 3, ZNEG = 4, ZPOS = 5;
 
-function addRecursiveSpheresBranch(objects, center, radius, depth, dir) {
+function addRecursiveSpheresBranch(objects, center, radius, depth, dir, nextObjectId) {
   objects.push(new Sphere(center, radius, nextObjectId++));
   if(depth--) {
-    if(dir != XNEG) addRecursiveSpheresBranch(objects, center.subtract(Vector.create([radius * 1.5, 0, 0])), radius / 2, depth, XPOS);
-    if(dir != XPOS) addRecursiveSpheresBranch(objects, center.add(Vector.create([radius * 1.5, 0, 0])),      radius / 2, depth, XNEG);
+    if(dir != XNEG) addRecursiveSpheresBranch(objects, center.subtract(Vector.create([radius * 1.5, 0, 0])), radius / 2, depth, XPOS, nextObjectId);
+    if(dir != XPOS) addRecursiveSpheresBranch(objects, center.add(Vector.create([radius * 1.5, 0, 0])),      radius / 2, depth, XNEG, nextObjectId);
     
-    if(dir != YNEG) addRecursiveSpheresBranch(objects, center.subtract(Vector.create([0, radius * 1.5, 0])), radius / 2, depth, YPOS);
-    if(dir != YPOS) addRecursiveSpheresBranch(objects, center.add(Vector.create([0, radius * 1.5, 0])),      radius / 2, depth, YNEG);
+    if(dir != YNEG) addRecursiveSpheresBranch(objects, center.subtract(Vector.create([0, radius * 1.5, 0])), radius / 2, depth, YPOS, nextObjectId);
+    if(dir != YPOS) addRecursiveSpheresBranch(objects, center.add(Vector.create([0, radius * 1.5, 0])),      radius / 2, depth, YNEG, nextObjectId);
     
-    if(dir != ZNEG) addRecursiveSpheresBranch(objects, center.subtract(Vector.create([0, 0, radius * 1.5])), radius / 2, depth, ZPOS);
-    if(dir != ZPOS) addRecursiveSpheresBranch(objects, center.add(Vector.create([0, 0, radius * 1.5])),      radius / 2, depth, ZNEG);
+    if(dir != ZNEG) addRecursiveSpheresBranch(objects, center.subtract(Vector.create([0, 0, radius * 1.5])), radius / 2, depth, ZPOS, nextObjectId);
+    if(dir != ZPOS) addRecursiveSpheresBranch(objects, center.add(Vector.create([0, 0, radius * 1.5])),      radius / 2, depth, ZNEG, nextObjectId);
   }
 }
 
 function makeRecursiveSpheres() {
   var objects = [];
-  addRecursiveSpheresBranch(objects, Vector.create([0, 0, 0]), 0.3, 2, -1);
+  let nextObjectId = 0;
+  addRecursiveSpheresBranch(objects, Vector.create([0, 0, 0]), 0.3, 2, -1, nextObjectId);
   return objects;
 }
+
+export { makeSphereAndCube, makeSphereColumn, makeCubeAndSpheres, makeSpherePyramid, makeRecursiveSpheres, makeStacks, makeTableAndChair };

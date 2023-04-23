@@ -1001,7 +1001,9 @@ function tick(timeSinceStart) {
   ui.render();
 }
 
-function makePathTracer(canvas, log, {material = 0, environment = 0}) {
+function makePathTracer(canvas, log, objects, {material = 0, environment = 0}) {
+  nextObjectId = objects.length + 1;
+
   log = log || console.log;
   gl = null;
   try { gl = canvas.getContext('experimental-webgl'); } catch(e) {}
@@ -1010,7 +1012,7 @@ function makePathTracer(canvas, log, {material = 0, environment = 0}) {
     log('Loading...');
 
     ui = new UI();
-    ui.setObjects(makeSphereColumn());
+    ui.setObjects(objects);
     var start = new Date();
     setInterval(function(){ tick((new Date() - start) * 0.001); }, 1000 / 60);
   } else {
@@ -1104,4 +1106,8 @@ function makePathTracer(canvas, log, {material = 0, environment = 0}) {
     }
   };
 
+  return ui;
+
 };
+
+export {makePathTracer, Sphere, Cube}

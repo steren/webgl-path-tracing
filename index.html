@@ -55,9 +55,12 @@ a {
   </style>
   <script type="text/javascript" src="sylvester.src.js"></script>
   <script type="text/javascript" src="glUtils.js"></script>
-  <script type="text/javascript" src="scenes.js"></script>
-  <script type="text/javascript" src="webgl-path-tracing.js"></script>
-  <script type="text/javascript">
+  <script type="module" src="webgl-path-tracing.js"></script>
+  <script type="module" src="scenes.js"></script>
+  <script type="module">
+    import {makePathTracer} from './webgl-path-tracing.js';
+    import {makeSphereColumn, makeSpherePyramid, makeSphereAndCube, makeCubeAndSpheres, makeTableAndChair, makeStacks} from './scenes.js';
+
     function log(message) {
       var log = document.getElementById('log');
       log.innerHTML = message;
@@ -69,7 +72,19 @@ a {
         glossinessFactor: document.getElementById('glossiness-factor'),
         environment: parseInt(document.getElementById('environment').value),
       };
-      makePathTracer(document.getElementById('canvas'), log, config);
+      const ui = makePathTracer(document.getElementById('canvas'), log, makeSphereColumn(), config);
+
+      document.getElementById('select-light').onclick = function(){ ui.selectLight() };
+      document.getElementById('add-sphere').onclick = function(){ ui.addSphere() };
+      document.getElementById('add-cube').onclick = function(){ ui.addCube() };
+
+      document.getElementById('make-sphere-column').onclick = function(){ ui.setObjects(makeSphereColumn()) };
+      document.getElementById('make-sphere-pyramid').onclick = function(){ ui.setObjects(makeSpherePyramid()) };
+      document.getElementById('make-sphere-and-cube').onclick = function(){ ui.setObjects(makeSphereAndCube()) };
+      document.getElementById('make-cube-and-spheres').onclick = function(){ ui.setObjects(makeCubeAndSpheres()) };
+      document.getElementById('make-table-and-chair').onclick = function(){ ui.setObjects(makeTableAndChair()) };
+      document.getElementById('make-stacks').onclick = function(){ ui.setObjects(makeStacks()) };
+
     };
   </script>
 </head><body>
@@ -90,9 +105,9 @@ a {
     <div id="log"><noscript>Please enable JavaScript.</noscript></div>
 
     <p>
-      <button onclick="javascript:ui.selectLight()">Select Light</button>
-      <button onclick="javascript:ui.addSphere()">Add Sphere</button>
-      <button onclick="javascript:ui.addCube()">Add Cube</button>
+      <button id="select-light">Select Light</button>
+      <button id="add-sphere">Add Sphere</button>
+      <button id="add-cube">Add Cube</button>
     </p>
 
     <p>
@@ -116,12 +131,12 @@ a {
 
     <p>
       <b>Load preset scene:</b>
-      <br><button onclick="javascript:ui.setObjects(makeSphereColumn())">Sphere Column</button>
-      <br><button onclick="javascript:ui.setObjects(makeSpherePyramid())">Sphere Pyramid</button>
-      <br><button onclick="javascript:ui.setObjects(makeSphereAndCube())">Sphere and Cube</button>
-      <br><button onclick="javascript:ui.setObjects(makeCubeAndSpheres())">Cube and Spheres</button>
-      <br><button onclick="javascript:ui.setObjects(makeTableAndChair())">Table and Chair</button>
-      <br><button onclick="javascript:ui.setObjects(makeStacks())">Stacks</button>
+      <br><button id="make-sphere-column">Sphere Column</button>
+      <br><button id="make-sphere-pyramid">Sphere Pyramid</button>
+      <br><button id="make-sphere-and-cube">Sphere and Cube</button>
+      <br><button id="make-cube-and-spheres">Cube and Spheres</button>
+      <br><button id="make-table-and-chair">Table and Chair</button>
+      <br><button id="make-stacks">Stacks</button>
     </p>
   </div>
 
