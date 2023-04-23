@@ -17,17 +17,6 @@ body {
   position: relative;
 }
 
-#error {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 412px;
-  height: 412px;
-  padding: 50px;
-  text-align: center;
-  background: #DFDFDF;
-}
-
 canvas {
   position: absolute;
   left: 0;
@@ -69,8 +58,13 @@ a {
   <script type="text/javascript" src="scenes.js"></script>
   <script type="text/javascript" src="webgl-path-tracing.js"></script>
   <script type="text/javascript">
+    function log(message) {
+      var log = document.getElementById('log');
+      log.innerHTML = message;
+    }
+
     window.onload = function() {
-      makePathTracer(document.getElementById('canvas'));
+      makePathTracer(document.getElementById('canvas'), log);
     };
   </script>
 </head><body>
@@ -88,7 +82,7 @@ a {
 
   <div id="main">
     <canvas id="canvas" width="512" height="512"></canvas>
-    <div id="error"><noscript>Please enable JavaScript.</noscript></div>
+    <div id="log"><noscript>Please enable JavaScript.</noscript></div>
 
     <p>
       <button onclick="javascript:ui.selectLight()">Select Light</button>
