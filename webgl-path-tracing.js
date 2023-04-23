@@ -1001,7 +1001,7 @@ function tick(timeSinceStart) {
   ui.render();
 }
 
-function makePathTracer(canvas, log) {
+function makePathTracer(canvas, log, {material = 0, environment = 0}) {
   log = log || console.log;
   gl = null;
   try { gl = canvas.getContext('experimental-webgl'); } catch(e) {}
@@ -1009,15 +1009,6 @@ function makePathTracer(canvas, log) {
   if(gl) {
     log('Loading...');
 
-    // keep track of whether an <input> is focused or not (will be no only if inputFocusCount == 0)
-    var inputs = document.getElementsByTagName('input');
-    for(var i= 0; i < inputs.length; i++) {
-      inputs[i].onfocus = function(){ inputFocusCount++; };
-      inputs[i].onblur = function(){ inputFocusCount--; };
-    }
-
-    material = parseInt(document.getElementById('material').value, 10);
-    environment = parseInt(document.getElementById('environment').value, 10);
     ui = new UI();
     ui.setObjects(makeSphereColumn());
     var start = new Date();

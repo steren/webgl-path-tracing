@@ -64,7 +64,12 @@ a {
     }
 
     window.onload = function() {
-      makePathTracer(document.getElementById('canvas'), log);
+      const config = {
+        material: parseInt(document.getElementById('material').value),
+        glossinessFactor: document.getElementById('glossiness-factor'),
+        environment: parseInt(document.getElementById('environment').value),
+      };
+      makePathTracer(document.getElementById('canvas'), log, config);
     };
   </script>
 </head><body>
