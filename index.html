@@ -68,6 +68,11 @@ a {
   <script type="text/javascript" src="glUtils.js"></script>
   <script type="text/javascript" src="scenes.js"></script>
   <script type="text/javascript" src="webgl-path-tracing.js"></script>
+  <script type="text/javascript">
+    window.onload = function() {
+      makePathTracer(document.getElementById('canvas'));
+    };
+  </script>
 </head><body>
   <h1>WebGL Path Tracing</h1>
 
