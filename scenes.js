@@ -27,6 +27,7 @@
 */
 
 import {Sphere, Cube} from './webgl-path-tracing.js';
+import { Vector } from './sylvester.src.js';
 
 function makeStacks() {
   var objects = [];

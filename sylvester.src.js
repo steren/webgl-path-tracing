@@ -546,7 +546,7 @@ Matrix.prototype = {
     var n = this.elements.length, k = n, i, np, kp = this.elements[0].length, p;
     do { i = k - n;
       if (M.elements[i][i] == 0) {
-        for (j = i + 1; j < k; j++) {
+        for (var j = i + 1; j < k; j++) {
           if (M.elements[j][i] != 0) {
             els = []; np = kp;
             do { p = kp - np;
@@ -558,7 +558,7 @@ Matrix.prototype = {
         }
       }
       if (M.elements[i][i] != 0) {
-        for (j = i + 1; j < k; j++) {
+        for (var j = i + 1; j < k; j++) {
           var multiplier = M.elements[j][i] / M.elements[i][i];
           els = []; np = kp;
           do { p = kp - np;
@@ -1252,3 +1252,5 @@ var $V = Vector.create;
 var $M = Matrix.create;
 var $L = Line.create;
 var $P = Plane.create;
+
+export {Vector, Matrix, Line, Plane, $V, $M, $L, $P}
