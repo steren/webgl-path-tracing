@@ -84,6 +84,20 @@ a {
       document.getElementById('make-cube-and-spheres').onclick = function(){ ui.setObjects(makeCubeAndSpheres()) };
       document.getElementById('make-table-and-chair').onclick = function(){ ui.setObjects(makeTableAndChair()) };
       document.getElementById('make-stacks').onclick = function(){ ui.setObjects(makeStacks()) };
+      document.getElementById('material').onchange = function() {
+        var newMaterial = parseInt(document.getElementById('material').value, 10);
+        ui.updateMaterial(newMaterial);
+        document.getElementById('glossiness-factor').style.display = (newMaterial == 2 /* MATERIAL_GLOSSY */) ? 'inline' : 'none';
+      };
+      document.getElementById('environment').onchange = function() {
+        var newEnvironment = parseInt(document.getElementById('environment').value, 10);
+        ui.updateEnvironment(newEnvironment);
+      };
+      document.getElementById('glossiness').onchange = function() {
+        var newGlossiness = parseFloat(document.getElementById('glossiness').value);
+        ui.updateGlossiness(newGlossiness);
+      };
+
 
     };
   </script>

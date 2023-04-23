@@ -935,24 +935,22 @@ UI.prototype.deleteSelection = function() {
   }
 };
 
-UI.prototype.updateMaterial = function() {
-  var newMaterial = parseInt(document.getElementById('material').value, 10);
+UI.prototype.updateMaterial = function(newMaterial) {
   if(material != newMaterial) {
     material = newMaterial;
     this.renderer.setObjects(this.objects);
   }
 };
 
-UI.prototype.updateEnvironment = function() {
-  var newEnvironment = parseInt(document.getElementById('environment').value, 10);
+UI.prototype.updateEnvironment = function(newEnvironment) {
   if(environment != newEnvironment) {
     environment = newEnvironment;
     this.renderer.setObjects(this.objects);
   }
 };
 
-UI.prototype.updateGlossiness = function() {
-  var newGlossiness = parseFloat(document.getElementById('glossiness').value);
+UI.prototype.updateGlossiness = function(newGlossiness) {
+
   if(isNaN(newGlossiness)) newGlossiness = 0;
   newGlossiness = Math.max(0, Math.min(1, newGlossiness));
   if(material == MATERIAL_GLOSSY && glossiness != newGlossiness) {
@@ -992,11 +990,6 @@ function tick(timeSinceStart) {
   eye.elements[1] = zoomZ * Math.sin(angleX);
   eye.elements[2] = zoomZ * Math.cos(angleY) * Math.cos(angleX);
 
-  document.getElementById('glossiness-factor').style.display = (material == MATERIAL_GLOSSY) ? 'inline' : 'none';
-
-  ui.updateMaterial();
-  ui.updateGlossiness();
-  ui.updateEnvironment();
   ui.update(timeSinceStart);
   ui.render();
 }
