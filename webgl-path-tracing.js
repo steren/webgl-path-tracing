@@ -43,9 +43,9 @@ function closestPowerOfTwo(num) {
   return power;
 }
 
-var canvasWidth = 512;
-var canvasHeight = 512;
-var renderSize = closestPowerOfTwo(Math.max(canvasWidth, canvasHeight));
+var canvasWidth;
+var canvasHeight;
+var renderSize;
 
 ////////////////////////////////////////////////////////////////////////////////
 // shader strings
@@ -1024,6 +1024,10 @@ function makePathTracer(canvas, objects, {material = 0, environment = 0} = {}, l
 
   if(gl) {
     log('Loading...');
+
+    canvasWidth = canvas.width;
+    canvasHeight = canvas.height;
+    renderSize = closestPowerOfTwo(Math.max(canvasWidth, canvasHeight));
 
     ui = new UI();
     ui.setObjects(objects);
