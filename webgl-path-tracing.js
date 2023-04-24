@@ -1014,7 +1014,7 @@ var glossiness = 0.6;
 
 var YELLOW_BLUE_CORNELL_BOX = "cornell-yellow-blue";
 var RED_GREEN_CORNELL_BOX = "cornell-red-green";
-var environment = YELLOW_BLUE_CORNELL_BOX;
+var environment; // default to no environment
 
 function tick(timeSinceStart) {
   eye.elements[0] = zoomZ * Math.sin(angleY) * Math.cos(angleX);
@@ -1034,7 +1034,10 @@ function tick(timeSinceStart) {
  * @param {function} [log] - a function to print log messages to, defaults to console.log
  * @returns {UI}
  */
-function makePathTracer(canvas, objects, {material = 0, environment = 0} = {}, interactive = true, log) {
+function makePathTracer(canvas, objects, config = {}, interactive = true, log) {
+  material = config.material;
+  glossinessFactor = config.glossinessFactor;
+  environment = config.environment;
   nextObjectId = objects.length + 1;
 
   log = log || console.log;
