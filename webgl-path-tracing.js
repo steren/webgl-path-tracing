@@ -1015,7 +1015,16 @@ function tick(timeSinceStart) {
   ui.render();
 }
 
-function makePathTracer(canvas, objects, {material = 0, environment = 0} = {}, log) {
+/**
+ * Initialize the path tracer on the given canvas
+ * @param {HTMLCanvasElement} canvas - Canvas to render to
+ * @param {Object[]} objects - Array of Sphere and Cube objects
+ * @param {Object} [configuration] - Specify material and environment to use
+ * @param {bool} [interactive=true] - if the user should be able to interact with the scene
+ * @param {function} [log] - a function to print log messages to, defaults to console.log
+ * @returns {UI}
+ */
+function makePathTracer(canvas, objects, {material = 0, environment = 0} = {}, interactive = true, log) {
   nextObjectId = objects.length + 1;
 
   log = log || console.log;
