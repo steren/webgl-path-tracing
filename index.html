@@ -80,7 +80,7 @@ a {
       const config = {
         material: parseInt(document.getElementById('material').value),
         glossinessFactor: document.getElementById('glossiness-factor'),
-        environment: parseInt(document.getElementById('environment').value),
+        environment: document.getElementById('environment').value,
       };
       const ui = makePathTracer(document.getElementById('canvas'), makeSphereColumn(), config, true, log);
 
@@ -100,7 +100,7 @@ a {
         document.getElementById('glossiness-factor').style.display = (newMaterial == 2 /* MATERIAL_GLOSSY */) ? 'inline' : 'none';
       };
       document.getElementById('environment').onchange = function() {
-        var newEnvironment = parseInt(document.getElementById('environment').value, 10);
+        var newEnvironment = document.getElementById('environment').value;
         ui.updateEnvironment(newEnvironment);
       };
       document.getElementById('glossiness').onchange = function() {
@@ -152,8 +152,8 @@ a {
 
       <b>Environment:</b>
       <select id="environment">
-        <option value="0" selected>Cornell Box - Yellow and Blue</option>
-        <option value="1">Cornell Box - Red and Green</option>
+        <option value="cornell-yellow-blue" selected>Cornell Box - Yellow and Blue</option>
+        <option value="cornell-red-green">Cornell Box - Red and Green</option>
       </select>
     </p>
 

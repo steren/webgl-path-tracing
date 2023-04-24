@@ -244,6 +244,16 @@ function makeShadow(objects) {
 ' }';
 }
 
+function makeEnvironment() {
+  if(environment == YELLOW_BLUE_CORNELL_BOX) {
+    return yellowBlueCornellBox;
+  } else if(environment == RED_GREEN_CORNELL_BOX) {
+    return redGreenCornellBox;
+  } else {
+    return '';
+  }
+}
+
 function makeCalculateColor(objects) {
   return '' +
 ' vec3 calculateColor(vec3 origin, vec3 ray, vec3 light) {' +
@@ -270,7 +280,7 @@ function makeCalculateColor(objects) {
       // calculate the normal (and change wall color)
 '     if(t == tRoom.y) {' + // Room walls
 '       normal = -normalForCube(hit, roomCubeMin, roomCubeMax);' +
-        [yellowBlueCornellBox, redGreenCornellBox][environment] +
+        makeEnvironment() +
         newDiffuseRay +
 '     } else if(t == ' + infinity + ') {' +
 '       break;' +
@@ -1002,8 +1012,8 @@ var MATERIAL_GLOSSY = 2;
 var material = MATERIAL_DIFFUSE;
 var glossiness = 0.6;
 
-var YELLOW_BLUE_CORNELL_BOX = 0;
-var RED_GREEN_CORNELL_BOX = 1;
+var YELLOW_BLUE_CORNELL_BOX = "cornell-yellow-blue";
+var RED_GREEN_CORNELL_BOX = "cornell-red-green";
 var environment = YELLOW_BLUE_CORNELL_BOX;
 
 function tick(timeSinceStart) {
