@@ -82,7 +82,7 @@ a {
         glossinessFactor: document.getElementById('glossiness-factor'),
         environment: parseInt(document.getElementById('environment').value),
       };
-      const ui = makePathTracer(document.getElementById('canvas'), makeSphereColumn(), config, log);
+      const ui = makePathTracer(document.getElementById('canvas'), makeSphereColumn(), config, true, log);
 
       document.getElementById('select-light').onclick = function(){ ui.selectLight() };
       document.getElementById('add-sphere').onclick = function(){ ui.addSphere() };
