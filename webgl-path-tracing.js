@@ -53,38 +53,38 @@ var renderSize = closestPowerOfTwo(Math.max(canvasWidth, canvasHeight));
 
 // vertex shader for drawing a textured quad
 var renderVertexSource =
-' attribute vec3 vertex;' +
-' varying vec2 texCoord;' +
-' void main() {' +
-'   texCoord = vertex.xy * 0.5 + 0.5;' +
-'   gl_Position = vec4(vertex, 1.0);' +
-' }';
+` attribute vec3 vertex;
+  varying vec2 texCoord;
+  void main() {
+   texCoord = vertex.xy * 0.5 + 0.5;
+   gl_Position = vec4(vertex, 1.0);
+  }`;
 
 // fragment shader for drawing a textured quad
 var renderFragmentSource =
-' precision highp float;' +
-' varying vec2 texCoord;' +
-' uniform sampler2D texture;' +
-' void main() {' +
-'   gl_FragColor = texture2D(texture, texCoord);' +
-' }';
+` precision highp float;
+  varying vec2 texCoord;
+  uniform sampler2D texture;
+  void main() {
+    gl_FragColor = texture2D(texture, texCoord);
+  }`;
 
 // vertex shader for drawing a line
 var lineVertexSource =
-' attribute vec3 vertex;' +
-' uniform vec3 cubeMin;' +
-' uniform vec3 cubeMax;' +
-' uniform mat4 modelviewProjection;' +
-' void main() {' +
-'   gl_Position = modelviewProjection * vec4(mix(cubeMin, cubeMax, vertex), 1.0);' +
-' }';
+` attribute vec3 vertex;
+  uniform vec3 cubeMin;
+  uniform vec3 cubeMax;
+  uniform mat4 modelviewProjection;
+  void main() {
+    gl_Position = modelviewProjection * vec4(mix(cubeMin, cubeMax, vertex), 1.0);
+  }`;
 
 // fragment shader for drawing a line
 var lineFragmentSource =
-' precision highp float;' +
-' void main() {' +
-'   gl_FragColor = vec4(1.0);' +
-' }';
+` precision highp float;
+  void main() {
+    gl_FragColor = vec4(1.0);
+  }`;
 
 // constants for the shaders
 var bounces = '5';
@@ -301,12 +301,12 @@ function makeCalculateColor(objects) {
 }
 
 function makeMain() {
-  return '' +
-' void main() {' +
-'   vec3 newLight = light + uniformlyRandomVector(timeSinceStart - 53.0) * ' + lightSize + ';' +
-'   vec3 texture = texture2D(texture, gl_FragCoord.xy / ' + renderSize + '.0).rgb;' +
-'   gl_FragColor = vec4(mix(calculateColor(eye, initialRay, newLight), texture, textureWeight), 1.0);' +
-' }';
+  return `
+ void main() {
+   vec3 newLight = light + uniformlyRandomVector(timeSinceStart - 53.0) * ${lightSize};
+   vec3 texture = texture2D(texture, gl_FragCoord.xy / ${renderSize}.0).rgb;
+   gl_FragColor = vec4(mix(calculateColor(eye, initialRay, newLight), texture, textureWeight), 1.0);
+ }`;
 }
 
 function makeTracerFragmentSource(objects) {
