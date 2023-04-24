@@ -263,18 +263,18 @@ function makeCalculateColor(objects) {
 
       // info about hit
 '     vec3 hit = origin + ray * t;' +
-'     vec3 surfaceColor = vec3(0.75);' +
+'     vec3 surfaceColor = vec3(0.75);' + // Default surface color
 '     float specularHighlight = 0.0;' +
 '     vec3 normal;' +
 
       // calculate the normal (and change wall color)
-'     if(t == tRoom.y) {' +
+'     if(t == tRoom.y) {' + // Room walls
 '       normal = -normalForCube(hit, roomCubeMin, roomCubeMax);' +
         [yellowBlueCornellBox, redGreenCornellBox][environment] +
         newDiffuseRay +
 '     } else if(t == ' + infinity + ') {' +
 '       break;' +
-'     } else {' +
+'     } else {' + // Object surfaces
 '       if(false) ;' + // hack to discard the first 'else' in 'else if'
         concat(objects, function(o){ return o.getNormalCalculationCode(); }) +
         [newDiffuseRay, newReflectiveRay, newGlossyRay][material] +
