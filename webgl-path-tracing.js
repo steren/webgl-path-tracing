@@ -43,8 +43,20 @@ function closestPowerOfTwo(num) {
   return power;
 }
 
+// checks that the passed canvas is square and power of two sized
+function isValidCanvas(canvas) {
+  if (canvas.width !== canvas.height) {
+    return false;
+  }
+  if ((canvas.width & (canvas.width - 1)) !== 0) {
+    return false;
+  }
+  return true;
+}
+
 var canvasWidth;
 var canvasHeight;
+// Has to be power of two (for now)
 var renderSize;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1027,7 +1039,7 @@ function tick(timeSinceStart) {
 
 /**
  * Initialize the path tracer on the given canvas
- * @param {HTMLCanvasElement} canvas - Canvas to render to
+ * @param {HTMLCanvasElement} canvas - Canvas to render to, must be square and power of two sized
  * @param {Object[]} objects - Array of Sphere and Cube objects
  * @param {Object} [config] - Specify material and environment to use
  * @param {bool} [interactive=true] - if the user should be able to interact with the scene
@@ -1047,14 +1059,18 @@ function makePathTracer(canvas, objects, config = {}, interactive = true, log) {
   if(gl) {
     log('Loading...');
 
-    canvasWidth = canvas.width;
-    canvasHeight = canvas.height;
-    renderSize = closestPowerOfTwo(Math.max(canvasWidth, canvasHeight));
+    if(isValidCanvas(canvas)) {      
+      canvasWidth = canvas.width;
+      canvasHeight = canvas.height;
+      renderSize = canvasWidth;
 
-    ui = new UI();
-    ui.setObjects(objects);
-    var start = new Date();
-    setInterval(function(){ tick((new Date() - start) * 0.001); }, 1000 / 60);
+      ui = new UI();
+      ui.setObjects(objects);
+      var start = new Date();
+      setInterval(function(){ tick((new Date() - start) * 0.001); }, 1000 / 60);
+    } else {
+      log('canvas must be square and power of two sized');
+    }
   } else {
     log('Your browser does not support WebGL.<br>Please see <a href="http://www.khronos.org/webgl/wiki/Getting_a_WebGL_Implementation">Getting a WebGL Implementation</a>.');
   }
