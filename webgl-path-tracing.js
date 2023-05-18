@@ -28,22 +28,9 @@
 
 import {Vector, Matrix, makeLookAt, makeOrtho, makePerspective, makeFrustum} from 'glUtils';
 
-function closestPowerOfTwo(num) {
-  // If num is already a power of two, return num
-  if ((num & (num - 1)) === 0) {
-    return num;
-  }
-
-  // Find the nearest power of two greater than num
-  let power = 1;
-  while (power < num) {
-    power *= 2;
-  }
-
-  return power;
-}
-
-// checks that the passed canvas is square and power of two sized
+/** 
+ * checks that the passed canvas is square and power of two sized
+ */
 function isValidCanvas(canvas) {
   if (canvas.width !== canvas.height) {
     return false;
