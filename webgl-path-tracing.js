@@ -829,6 +829,7 @@ Renderer.prototype.update = function(modelviewProjection, timeSinceStart) {
 Renderer.prototype.render = function() {
   this.pathTracer.render();
 
+  // Render Ui overlay for selected object.
   if(this.selectedObject != null) {
     gl.useProgram(this.lineProgram);
     gl.bindTexture(gl.TEXTURE_2D, null);
