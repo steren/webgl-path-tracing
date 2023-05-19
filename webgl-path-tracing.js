@@ -32,6 +32,8 @@ import {Vector, Matrix, makeLookAt, makeOrtho, makePerspective, makeFrustum} fro
 // shader strings
 ////////////////////////////////////////////////////////////////////////////////
 
+var defaultSurfaceColor = "0.75";
+
 // vertex shader for drawing a textured quad
 var renderVertexSource =
 ` attribute vec3 vertex;
@@ -254,7 +256,7 @@ function makeCalculateColor(objects) {
 
       // info about hit
 '     vec3 hit = origin + ray * t;' +
-'     vec3 surfaceColor = vec3(0.75);' + // Default surface color
+'     vec3 surfaceColor = vec3(' + defaultSurfaceColor + ');' +
 '     float specularHighlight = 0.0;' +
 '     vec3 normal;' +
 
