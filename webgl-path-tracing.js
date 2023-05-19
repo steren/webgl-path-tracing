@@ -472,8 +472,11 @@ Sphere.prototype.getMinimumIntersectCode = function() {
 };
 
 Sphere.prototype.getNormalCalculationCode = function() {
-  return '' +
-' else if(t == ' + this.intersectStr + ') normal = normalForSphere(hit, ' + this.centerStr + ', ' + this.radiusStr + ');';
+  return `
+  else if(t == ${this.intersectStr}) { 
+    normal = normalForSphere(hit, ${this.centerStr}, ${this.radiusStr}); 
+  }`;
+//   surfaceColor = vec3(1.0, 1.0, 1.0); 
 };
 
 Sphere.prototype.setUniforms = function(renderer) {
@@ -552,10 +555,14 @@ Cube.prototype.getMinimumIntersectCode = function() {
 };
 
 Cube.prototype.getNormalCalculationCode = function() {
-  return '' +
   // have to compare intersectStr.x < intersectStr.y otherwise two coplanar
   // cubes will look wrong (one cube will "steal" the hit from the other)
-' else if(t == ' + this.intersectStr + '.x && ' + this.intersectStr + '.x < ' + this.intersectStr + '.y) normal = normalForCube(hit, ' + this.minStr + ', ' + this.maxStr + ');';
+  return `
+  else if(t == ${this.intersectStr}.x && ${this.intersectStr}.x < ${this.intersectStr}.y) { 
+    normal = normalForCube(hit, ${this.minStr}, ${this.maxStr});
+  }`;
+//   surfaceColor = vec3(1.0, 1.0, 1.0); 
+
 };
 
 Cube.prototype.setUniforms = function(renderer) {
