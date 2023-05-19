@@ -1000,8 +1000,8 @@ var inputFocusCount = 0;
 
 var angleX = 0;
 var angleY = 0;
-var zoomZ;
-var fov;
+var zoomZ = 2.5
+var fov = 55
 var eye = Vector.create([0, 0, 0]);
 var light = Vector.create([0.4, 0.5, -0.6]);
 
@@ -1030,7 +1030,7 @@ function tick(timeSinceStart) {
  * Initialize the path tracer on the given canvas
  * @param {HTMLCanvasElement} canvas - Canvas to render to, must be square and power of two sized
  * @param {Object[]} objects - Array of Sphere and Cube objects
- * @param {Object} [config] - Specify: material, environment, zoom (in distance from center), fov (field of view, in degres)
+ * @param {Object} [config] - Specify: material, environment, zoom (in distance from center), fov (field of view, in degrees), lightPosition ([x,y,z])
  * @param {bool} [interactive=true] - if the user should be able to interact with the scene
  * @param {function} [log] - a function to print log messages to, defaults to console.log
  * @returns {UI}
@@ -1041,8 +1041,15 @@ function makePathTracer(canvas, objects, config = {}, interactive = true, log) {
   environment = config.environment;
   nextObjectId = objects.length + 1;
 
-  zoomZ = config.zoom || 2.5;
-  fov = config.fov || 55;
+  if(config.zoom) {
+    zoomZ = config.zoom;
+  }
+  if(config.fov) {
+    fov = config.fov;
+  }
+  if(config.lightPosition) {
+    light = Vector.create(config.lightPosition);
+  }
 
   log = log || console.log;
   gl = null;
