@@ -28,24 +28,6 @@
 
 import {Vector, Matrix, makeLookAt, makeOrtho, makePerspective, makeFrustum} from 'glUtils';
 
-/** 
- * checks that the passed canvas is square and power of two sized
- */
-function isValidCanvas(canvas) {
-  if (canvas.width !== canvas.height) {
-    return false;
-  }
-  if ((canvas.width & (canvas.width - 1)) !== 0) {
-    return false;
-  }
-  return true;
-}
-
-var canvasWidth;
-var canvasHeight;
-// Has to be power of two (for now)
-var renderSize;
-
 ////////////////////////////////////////////////////////////////////////////////
 // shader strings
 ////////////////////////////////////////////////////////////////////////////////
@@ -1016,6 +998,24 @@ var glossiness = 0.6;
 var YELLOW_BLUE_CORNELL_BOX = "cornell-yellow-blue";
 var RED_GREEN_CORNELL_BOX = "cornell-red-green";
 var environment; // default to no environment
+
+/** 
+ * checks that the passed canvas is square and power of two sized
+ */
+function isValidCanvas(canvas) {
+  if (canvas.width !== canvas.height) {
+    return false;
+  }
+  if ((canvas.width & (canvas.width - 1)) !== 0) {
+    return false;
+  }
+  return true;
+}
+
+var canvasWidth;
+var canvasHeight;
+// Has to be power of two (for now)
+var renderSize;
 
 function tick(timeSinceStart) {
   eye.elements[0] = zoomZ * Math.sin(angleY) * Math.cos(angleX);
