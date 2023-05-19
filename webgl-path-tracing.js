@@ -862,7 +862,7 @@ UI.prototype.setObjects = function(objects) {
 
 UI.prototype.update = function(timeSinceStart) {
   this.modelview = makeLookAt(eye.elements[0], eye.elements[1], eye.elements[2], 0, 0, 0, 0, 1, 0);
-  this.projection = makePerspective(55, 1, 0.1, 100);
+  this.projection = makePerspective(fov, canvasWidth/canvasHeight, 0.1, 100);
   this.modelviewProjection = this.projection.multiply(this.modelview);
   this.renderer.update(this.modelviewProjection, timeSinceStart);
 };
@@ -1001,6 +1001,7 @@ var inputFocusCount = 0;
 var angleX = 0;
 var angleY = 0;
 var zoomZ = 2.5;
+var fov = 55;
 var eye = Vector.create([0, 0, 0]);
 var light = Vector.create([0.4, 0.5, -0.6]);
 
