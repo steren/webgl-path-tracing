@@ -32,7 +32,8 @@ import {Vector, Matrix, makeLookAt, makeOrtho, makePerspective, makeFrustum} fro
 // shader strings
 ////////////////////////////////////////////////////////////////////////////////
 
-var defaultSurfaceColor = "0.75";
+var defaultSurfaceColor = 0.75
+var defaultSurfaceColorStr = "" + defaultSurfaceColor;
 
 // vertex shader for drawing a textured quad
 var renderVertexSource =
@@ -256,7 +257,7 @@ function makeCalculateColor(objects) {
 
       // info about hit
 '     vec3 hit = origin + ray * t;' +
-'     vec3 surfaceColor = vec3(' + defaultSurfaceColor + ');' +
+'     vec3 surfaceColor = vec3(' + defaultSurfaceColorStr + ');' +
 '     float specularHighlight = 0.0;' +
 '     vec3 normal;' +
 
@@ -440,11 +441,13 @@ function compileShader(vertexSource, fragmentSource) {
 // class Sphere
 ////////////////////////////////////////////////////////////////////////////////
 
-function Sphere(center, radius, id) {
+function Sphere(center, radius, id, color) {
   this.center = center;
   this.radius = radius;
+  this.color = color || Vector.create([defaultSurfaceColor, defaultSurfaceColor, defaultSurfaceColor]);
   this.centerStr = 'sphereCenter' + id;
   this.radiusStr = 'sphereRadius' + id;
+  this.colorStr = 'color' + id;
   this.intersectStr = 'tSphere' + id;
   this.temporaryTranslation = Vector.create([0, 0, 0]);
 }
@@ -452,7 +455,8 @@ function Sphere(center, radius, id) {
 Sphere.prototype.getGlobalCode = function() {
   return '' +
 ' uniform vec3 ' + this.centerStr + ';' +
-' uniform float ' + this.radiusStr + ';';
+' uniform float ' + this.radiusStr + ';' +
+' uniform vec3 ' + this.colorStr + ';';
 };
 
 Sphere.prototype.getIntersectCode = function() {
@@ -474,14 +478,15 @@ Sphere.prototype.getMinimumIntersectCode = function() {
 Sphere.prototype.getNormalCalculationCode = function() {
   return `
   else if(t == ${this.intersectStr}) { 
-    normal = normalForSphere(hit, ${this.centerStr}, ${this.radiusStr}); 
+    normal = normalForSphere(hit, ${this.centerStr}, ${this.radiusStr});
+    surfaceColor = ${this.colorStr}; 
   }`;
-//   surfaceColor = vec3(1.0, 1.0, 1.0); 
 };
 
 Sphere.prototype.setUniforms = function(renderer) {
   renderer.uniforms[this.centerStr] = this.center.add(this.temporaryTranslation);
   renderer.uniforms[this.radiusStr] = this.radius;
+  renderer.uniforms[this.colorStr] = this.color;
 };
 
 Sphere.prototype.temporaryTranslate = function(translation) {
@@ -523,11 +528,13 @@ Sphere.intersect = function(origin, ray, center, radius) {
 // class Cube
 ////////////////////////////////////////////////////////////////////////////////
 
-function Cube(minCorner, maxCorner, id) {
+function Cube(minCorner, maxCorner, id, color) {
   this.minCorner = minCorner;
   this.maxCorner = maxCorner;
+  this.color = color || Vector.create([defaultSurfaceColor, defaultSurfaceColor, defaultSurfaceColor]);
   this.minStr = 'cubeMin' + id;
   this.maxStr = 'cubeMax' + id;
+  this.colorStr = 'color' + id;
   this.intersectStr = 'tCube' + id;
   this.temporaryTranslation = Vector.create([0, 0, 0]);
 }
@@ -535,7 +542,8 @@ function Cube(minCorner, maxCorner, id) {
 Cube.prototype.getGlobalCode = function() {
   return '' +
 ' uniform vec3 ' + this.minStr + ';' +
-' uniform vec3 ' + this.maxStr + ';';
+' uniform vec3 ' + this.maxStr + ';' +
+' uniform vec3 ' + this.colorStr + ';';
 };
 
 Cube.prototype.getIntersectCode = function() {
@@ -560,14 +568,15 @@ Cube.prototype.getNormalCalculationCode = function() {
   return `
   else if(t == ${this.intersectStr}.x && ${this.intersectStr}.x < ${this.intersectStr}.y) { 
     normal = normalForCube(hit, ${this.minStr}, ${this.maxStr});
+    surfaceColor = ${this.colorStr}; 
   }`;
-//   surfaceColor = vec3(1.0, 1.0, 1.0); 
 
 };
 
 Cube.prototype.setUniforms = function(renderer) {
   renderer.uniforms[this.minStr] = this.getMinCorner();
   renderer.uniforms[this.maxStr] = this.getMaxCorner();
+  renderer.uniforms[this.colorStr] = this.color;
 };
 
 Cube.prototype.temporaryTranslate = function(translation) {
