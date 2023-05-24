@@ -11,18 +11,9 @@ The entire scene is dynamically compiled into a GLSL shader. Everything can be r
 ## Use as a library
 
 ```html
-<script type="importmap">
-{
-	"imports": {
-		"sylvester": "./sylvester.src.js",
-		"glUtils": "./glUtils.js",
-		"webgl-path-tracing": "./webgl-path-tracing.js"
-	}
-}
-</script>
 <script type="module">
-	import {makePathTracer, Cube, Sphere} from 'webgl-path-tracing';
-	import { Vector } from 'sylvester';
+	import {makePathTracer, Cube, Sphere} from './webgl-path-tracing.js';
+	import {Vector} from './sylvester.src.js';
 
 	let objects = [];
 	let nextObjectId = 0;

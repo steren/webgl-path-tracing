@@ -57,19 +57,9 @@ a {
 }
 
   </style>
-  <script type="importmap">
-    {
-      "imports": {
-        "sylvester": "./sylvester.src.js",
-        "glUtils": "./glUtils.js",
-        "scenes": "./scenes.js",
-        "webgl-path-tracing": "./webgl-path-tracing.js"
-      }
-    }
-  </script>
   <script type="module">
-    import {makePathTracer} from 'webgl-path-tracing';
-    import {makeSphereColumn, makeSpherePyramid, makeSphereAndCube, makeCubeAndSpheres, makeTableAndChair, makeStacks} from 'scenes';
+    import {makePathTracer} from './webgl-path-tracing.js';
+    import {makeSphereColumn, makeSpherePyramid, makeSphereAndCube, makeCubeAndSpheres, makeTableAndChair, makeStacks} from './scenes.js';
 
     function log(message) {
       console.log(message);

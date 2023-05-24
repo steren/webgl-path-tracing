@@ -26,7 +26,7 @@
  OTHER DEALINGS IN THE SOFTWARE.
 */
 
-import {Vector, Matrix, makeLookAt, makeOrtho, makePerspective, makeFrustum} from 'glUtils';
+import {Vector, Matrix, makeLookAt, makePerspective} from './glUtils.js';
 
 ////////////////////////////////////////////////////////////////////////////////
 // shader strings
