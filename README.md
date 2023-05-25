@@ -1,8 +1,8 @@
 # WebGL Path Tracing
 
-![](https://http://webgl-path-tracing.steren.fr/image.png)
+![](https://webgl-path-tracing.steren.fr/image.png)
 
-[Try it live](https://http://webgl-path-tracing.steren.fr/)
+[Try it live](https://webgl-path-tracing.steren.fr)
 
 Path tracing is a realistic lighting algorithm that simulates light bouncing around a scene. This path tracer uses WebGL for realtime performance and supports diffuse, mirrored, and glossy surfaces. The path tracer is continually rendering, so the scene will start off grainy and become smoother over time.
 
