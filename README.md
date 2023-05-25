@@ -1,6 +1,6 @@
 # WebGL Path Tracing
 
-![](https://webgl-path-tracing.steren.fr/image.png)
+![Screenshot](image.png)
 
 [Try it live](https://webgl-path-tracing.steren.fr)
 
