@@ -71,11 +71,9 @@ var lineFragmentSource =
   }`;
 
 // constants for the shaders
-var bounces = '5';
-var epsilon = '0.0001';
-var infinity = '10000.0';
-var lightSize = 0.1;
-var lightVal = 0.5;
+const bounces = '5';
+const epsilon = '0.0001';
+const infinity = '10000.0';
 
 // vertex shader, interpolate ray per-pixel
 var tracerVertexSource =
@@ -998,24 +996,26 @@ var gl;
 var ui;
 var inputFocusCount = 0;
 
-var angleX = 0;
-var angleY = 0;
-var zoomZ = 2.5
-var fov = 55
-var eye = Vector.create([0, 0, 0]);
+let angleX = 0;
+let angleY = 0;
+let zoomZ = 2.5
+let fov = 55
+let eye = Vector.create([0, 0, 0]);
 var light = Vector.create([0.4, 0.5, -0.6]);
+let lightSize = 0.1;
+let lightVal = 0.5;
 
-var nextObjectId = 0;
+let nextObjectId = 0;
 
-var MATERIAL_DIFFUSE = 0;
-var MATERIAL_MIRROR = 1;
-var MATERIAL_GLOSSY = 2;
-var material = MATERIAL_DIFFUSE;
-var glossiness = 0.6;
+const MATERIAL_DIFFUSE = 0;
+const MATERIAL_MIRROR = 1;
+const MATERIAL_GLOSSY = 2;
+let material = MATERIAL_DIFFUSE;
+let glossiness = 0.6;
 
-var YELLOW_BLUE_CORNELL_BOX = "cornell-yellow-blue";
-var RED_GREEN_CORNELL_BOX = "cornell-red-green";
-var environment; // default to no environment
+const YELLOW_BLUE_CORNELL_BOX = "cornell-yellow-blue";
+const RED_GREEN_CORNELL_BOX = "cornell-red-green";
+let environment; // default to no environment
 
 /** 
  * checks that the passed canvas is square and power of two sized
@@ -1030,10 +1030,10 @@ function isValidCanvas(canvas) {
   return true;
 }
 
-var canvasWidth;
-var canvasHeight;
+let canvasWidth;
+let canvasHeight;
 // Has to be power of two (for now)
-var renderSize;
+let renderSize;
 
 function tick(timeSinceStart) {
   eye.elements[0] = zoomZ * Math.sin(angleY) * Math.cos(angleX);
@@ -1048,7 +1048,7 @@ function tick(timeSinceStart) {
  * Initialize the path tracer on the given canvas
  * @param {HTMLCanvasElement} canvas - Canvas to render to, must be square and power of two sized
  * @param {Object[]} objects - Array of Sphere and Cube objects
- * @param {Object} [config] - Specify: material, environment, zoom (in distance from center), fov (field of view, in degrees), lightPosition ([x,y,z])
+ * @param {Object} [config] - Specify: material, environment, zoom (in distance from center), fov (field of view, in degrees), lightPosition ([x,y,z]), lightSize, lightVal (0-1)
  * @param {bool} [interactive=true] - if the user should be able to interact with the scene
  * @param {function} [log] - a function to print log messages to, defaults to console.log
  * @returns {UI}
@@ -1067,6 +1067,12 @@ function makePathTracer(canvas, objects, config = {}, interactive = true, log) {
   }
   if(config.lightPosition) {
     light = Vector.create(config.lightPosition);
+  }
+  if(config.lightSize) {
+    lightSize = config.lightSize;
+  }
+  if(config.lightVal) {
+    lightVal = config.lightVal;
   }
 
   log = log || console.log;
