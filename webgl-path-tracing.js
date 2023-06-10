@@ -693,14 +693,14 @@ function PathTracer() {
   this.framebuffer = gl.createFramebuffer();
 
   // create textures
-  var type = gl.getExtension('OES_texture_float') ? gl.FLOAT : gl.UNSIGNED_BYTE;
+  this.type = gl.getExtension('OES_texture_float') ? gl.FLOAT : gl.UNSIGNED_BYTE;
   this.textures = [];
   for(var i = 0; i < 2; i++) {
       this.textures.push(gl.createTexture());
     gl.bindTexture(gl.TEXTURE_2D, this.textures[i]);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, renderSize, renderSize, 0, gl.RGB, type, null);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, renderSize, renderSize, 0, gl.RGB, this.type, null);
   }
   gl.bindTexture(gl.TEXTURE_2D, null);
 
@@ -753,6 +753,18 @@ PathTracer.prototype.update = function(matrix, timeSinceStart) {
   gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
   gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
   gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.textures[1], 0);
+  if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_INCOMPLETE_ATTACHMENT && this.type === gl.FLOAT) {
+    // Firefox doesn't support rendering to floating-point textures (Chrome and
+    // Safari do) even though it supports the OES_texture_float extension. As
+    // a workaround, convert these textures from floats to bytes if rendering
+    // to them fails.
+    this.type = gl.UNSIGNED_BYTE;
+    for (var i = 0; i < this.textures.length; i++) {
+      gl.bindTexture(gl.TEXTURE_2D, this.textures[i]);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, 512, 512, 0, gl.RGB, this.type, null);
+    }
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.textures[1], 0);
+  }
   gl.vertexAttribPointer(this.tracerVertexAttribute, 2, gl.FLOAT, false, 0, 0);
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   gl.bindFramebuffer(gl.FRAMEBUFFER, null);
