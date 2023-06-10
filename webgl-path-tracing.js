@@ -1183,7 +1183,6 @@ function makePathTracer(canvas, objects, config = {}, interactive = true, log) {
         oldX = mouse.x;
         oldY = mouse.y;
       } else {
-        var canvasPos = elementPos(canvas);
         ui.mouseMove(mouse.x, mouse.y);
       }
     };
@@ -1207,6 +1206,33 @@ function makePathTracer(canvas, objects, config = {}, interactive = true, log) {
         }
       }
     };
+
+    document.addEventListener('touchstart', function (event) {
+      if (event.target === canvas && event.touches.length === 1) {
+        var mouse = canvasMousePos(event.touches[0]);
+        oldX = mouse.x;
+        oldY = mouse.y;
+        mouseDown = true;
+        event.preventDefault();
+      } else {
+        mouseDown = false;
+      }
+    }, { pasive: false });
+    
+    document.addEventListener('touchmove', function (event) {
+      if (mouseDown && event.touches.length === 1) {
+        document.onmousemove(event.touches[0]);
+      }
+    }, { pasive: false });
+    
+    document.addEventListener('touchend', function () {
+      mouseDown = false;
+    }, { pasive: false });
+    
+    document.addEventListener('touchcancel', function () {
+      mouseDown = false;
+    }, { pasive: false });
+    
   }
 
   return ui;
