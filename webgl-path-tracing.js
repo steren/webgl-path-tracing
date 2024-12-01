@@ -845,7 +845,18 @@ function Renderer() {
   this.objects = [];
   this.selectedObject = null;
   this.pathTracer = new PathTracer();
+  this.paused = false;
 }
+
+
+Renderer.prototype.pause = function() {
+  this.paused = true;
+}
+
+Renderer.prototype.resume = function() {
+  this.paused = false;
+}
+
 
 Renderer.prototype.setObjects = function(objects) {
   this.objects = objects;
@@ -861,21 +872,22 @@ Renderer.prototype.update = function(modelviewProjection, timeSinceStart) {
 };
 
 Renderer.prototype.render = function() {
-  this.pathTracer.render();
-
-  // Render Ui overlay for selected object.
-  if(this.selectedObject != null) {
-    gl.useProgram(this.lineProgram);
-    gl.bindTexture(gl.TEXTURE_2D, null);
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
-    gl.vertexAttribPointer(this.vertexAttribute, 3, gl.FLOAT, false, 0, 0);
-    setUniforms(this.lineProgram, {
-      cubeMin: this.selectedObject.getMinCorner(),
-      cubeMax: this.selectedObject.getMaxCorner(),
-      modelviewProjection: this.modelviewProjection
-    });
-    gl.drawElements(gl.LINES, 24, gl.UNSIGNED_SHORT, 0);
+  if(!this.paused) {
+    this.pathTracer.render();
+    // Render Ui overlay for selected object.
+    if(this.selectedObject != null) {
+      gl.useProgram(this.lineProgram);
+      gl.bindTexture(gl.TEXTURE_2D, null);
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+      gl.vertexAttribPointer(this.vertexAttribute, 3, gl.FLOAT, false, 0, 0);
+      setUniforms(this.lineProgram, {
+        cubeMin: this.selectedObject.getMinCorner(),
+        cubeMax: this.selectedObject.getMaxCorner(),
+        modelviewProjection: this.modelviewProjection
+      });
+      gl.drawElements(gl.LINES, 24, gl.UNSIGNED_SHORT, 0);
+    }
   }
 };
 

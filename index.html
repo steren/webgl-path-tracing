@@ -76,8 +76,12 @@ a {
       const ui = makePathTracer(document.getElementById('canvas'), makeSphereColumn(), config, true, log);
 
       document.getElementById('select-light').onclick = function(){ ui.selectLight() };
+      document.getElementById('select-light').onclick = function(){ ui.selectLight() };
       document.getElementById('add-sphere').onclick = function(){ ui.addSphere() };
       document.getElementById('add-cube').onclick = function(){ ui.addCube() };
+
+      document.getElementById('pause').onclick = function(){ ui.renderer.pause() };
+      document.getElementById('resume').onclick = function(){ ui.renderer.resume() };
 
       document.getElementById('make-sphere-column').onclick = function(){ ui.setObjects(makeSphereColumn()) };
       document.getElementById('make-sphere-pyramid').onclick = function(){ ui.setObjects(makeSpherePyramid()) };
@@ -156,6 +160,12 @@ a {
       <br><button id="make-cube-and-spheres">Cube and Spheres</button>
       <br><button id="make-table-and-chair">Table and Chair</button>
       <br><button id="make-stacks">Stacks</button>
+    </p>
+
+    <p>
+      <b>Rendering:</b>
+      <button id="pause">Pause</button>
+      <button id="resume">Resume</button>
     </p>
   </div>
 
