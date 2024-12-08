@@ -1018,6 +1018,10 @@ UI.prototype.setLightPosition = function(position) {
   light = Vector.create(position);
 };
 
+UI.prototype.setLightVal = function(val) {
+  lightVal = val;
+};
+
 UI.prototype.updateMaterial = function(newMaterial) {
   if(material != newMaterial) {
     material = newMaterial;
