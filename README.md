@@ -12,7 +12,7 @@ The entire scene is dynamically compiled into a GLSL shader. Everything can be r
 
 Install the module with `npm install webgl-path-tracing`
 
-Add to your page with:
+Use your favorite bundler or add to your page with:
 
 ```html
 <script type="importmap">
