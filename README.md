@@ -12,6 +12,23 @@ Samples accumulate into a floating point buffer where the browser can render to
 one, so the image keeps converging instead of settling at the precision of an
 8 bit buffer. The canvas can be any size, square or not.
 
+## Shapes
+
+Three shapes are available:
+
+- `new Sphere(center, radius, id, color)`
+- `new Cube(minCorner, maxCorner, id, color)`
+- `new ExtrudedRectangle(minCorner, maxCorner, borderRadius, id, color, axis)`
+
+An extruded rectangle is a box whose cross section is a rectangle with rounded
+corners, like a CSS `border-radius` extruded into a solid: the four edges
+running along `axis` (`'x'`, `'y'` or `'z'`, defaults to `'z'`) are rounded off
+by `borderRadius` and the two ends stay flat. The radius is clamped to half of
+the smaller side of the cross section, and a radius of 0 gives a plain box.
+
+`color` is optional and defaults to a neutral grey. `id` has to be unique within
+a scene, since it is used to name the shape's uniforms in the generated shader.
+
 ## Use the module
 
 Install the module with `npm install webgl-path-tracing`
@@ -29,13 +46,14 @@ Use your favorite bundler or add to your page with:
 </script>
 
 <script type="module">
-	import {makePathTracer, Cube, Sphere} from 'webgl-path-tracing';
+	import {makePathTracer, Cube, Sphere, ExtrudedRectangle} from 'webgl-path-tracing';
 	import {Vector} from 'sylvester';
 
 	let objects = [];
 	let nextObjectId = 0;
 	objects.push(new Cube(Vector.create([-0.25, -1, -0.25]), Vector.create([0.25, -0.75, 0.25]), nextObjectId++));
   objects.push(new Sphere(Vector.create([0, -0.75, 0]), 0.25, nextObjectId++)); 
+  objects.push(new ExtrudedRectangle(Vector.create([-0.5, -0.5, -0.1]), Vector.create([0.5, 0, 0.1]), 0.15, nextObjectId++));
 
 	window.onload = function() {
 		makePathTracer(document.getElementById('canvas'), objects);

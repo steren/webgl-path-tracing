@@ -130,6 +130,119 @@ var normalForCubeSource =
 '   return sign(d) * step(a.yzx, a) * step(a.zxy, a);' +
 ' }';
 
+// merge one convex piece of a shape into the running [near, far] interval.
+// Pieces that the ray misses come in with near > far and leave it untouched.
+var unionIntervalSource =
+' vec2 unionInterval(vec2 interval, vec2 piece) {' +
+'   if(piece.x >= piece.y) return interval;' +
+'   return vec2(min(interval.x, piece.x), max(interval.y, piece.y));' +
+' }';
+
+// compute the near and far intersections of an infinitely long cylinder of the
+// given radius, centered on the line through `center` along `axis` (a unit
+// vector along x, y or z). The problem is the 2D ray/circle one in the plane
+// perpendicular to the axis, so the axis aligned components are projected out.
+var intersectAxisCylinderSource =
+' vec2 intersectAxisCylinder(vec3 origin, vec3 ray, vec3 center, float radius, vec3 axis) {' +
+'   vec3 toAxis = origin - center;' +
+'   toAxis -= axis * dot(toAxis, axis);' +
+'   vec3 flatRay = ray - axis * dot(ray, axis);' +
+'   float a = dot(flatRay, flatRay);' +
+'   float c = dot(toAxis, toAxis) - radius * radius;' +
+    // a ray running along the axis never crosses the surface: it is either
+    // inside for its whole length or outside for all of it
+'   if(a < 1e-12) {' +
+'     if(c < 0.0) return vec2(-' + infinity + ', ' + infinity + ');' +
+'     return vec2(' + infinity + ', -' + infinity + ');' +
+'   }' +
+'   float b = 2.0 * dot(toAxis, flatRay);' +
+'   float discriminant = b * b - 4.0 * a * c;' +
+'   if(discriminant < 0.0) return vec2(' + infinity + ', -' + infinity + ');' +
+'   float root = sqrt(discriminant);' +
+'   return vec2((-b - root) / (2.0 * a), (-b + root) / (2.0 * a));' +
+' }';
+
+// compute the near and far intersections of a rectangle with rounded corners
+// extruded along `axis` (a unit vector along x, y or z): the cross section is
+// the rectangle of the box with its four corners rounded off by `radius`, and
+// the two ends of the extrusion are flat.
+//
+// The solid is convex, so a ray crosses it over a single interval. It is
+// covered by six convex pieces (two boxes crossing each other in a plus shape,
+// plus the four corner cylinders), so that interval is simply the union of the
+// intervals of the pieces. The cylinders are infinite and have to be clipped
+// to the extruded extent first; the two boxes are already bounded.
+var intersectExtrudedRectangleSource =
+' vec2 intersectExtrudedRectangle(vec3 origin, vec3 ray, vec3 boxMin, vec3 boxMax, float radius, vec3 axis) {' +
+'   vec3 center = (boxMin + boxMax) * 0.5;' +
+'   vec3 halfSize = (boxMax - boxMin) * 0.5;' +
+    // the two cross section axes: for axis = (0, 0, 1) these are x and y
+'   vec3 u = axis.zxy;' +
+'   vec3 v = axis.yzx;' +
+
+'   vec3 halfU = halfSize - radius * v;' +
+'   vec3 halfV = halfSize - radius * u;' +
+'   vec2 interval = vec2(' + infinity + ', -' + infinity + ');' +
+'   interval = unionInterval(interval, intersectCube(origin, ray, center - halfU, center + halfU));' +
+'   interval = unionInterval(interval, intersectCube(origin, ray, center - halfV, center + halfV));' +
+
+    // where the ray is between the two flat ends
+'   float axisRay = dot(ray, axis);' +
+'   float axisOrigin = dot(origin, axis) - dot(center, axis);' +
+'   float axisHalf = dot(halfSize, axis);' +
+'   vec2 ends;' +
+'   if(abs(axisRay) > 1e-12) {' +
+'     float end1 = (-axisHalf - axisOrigin) / axisRay;' +
+'     float end2 = (axisHalf - axisOrigin) / axisRay;' +
+'     ends = vec2(min(end1, end2), max(end1, end2));' +
+'   } else if(abs(axisOrigin) <= axisHalf) {' +
+'     ends = vec2(-' + infinity + ', ' + infinity + ');' +
+'   } else {' +
+'     ends = vec2(' + infinity + ', -' + infinity + ');' +
+'   }' +
+
+    // the corner cylinders are centered on the corners of the box shrunk by
+    // the radius, which is exactly the box the rounded shape is the sweep of
+'   vec3 offsetU = (halfSize - radius * u) * u;' +
+'   vec3 offsetV = (halfSize - radius * v) * v;' +
+'   for(int corner = 0; corner < 4; corner++) {' +
+'     vec3 cornerCenter = center +' +
+'         (corner < 2 ? offsetU : -offsetU) +' +
+'         (corner == 0 || corner == 2 ? offsetV : -offsetV);' +
+'     vec2 cylinder = intersectAxisCylinder(origin, ray, cornerCenter, radius, axis);' +
+'     interval = unionInterval(interval, vec2(max(cylinder.x, ends.x), min(cylinder.y, ends.y)));' +
+'   }' +
+
+'   return interval;' +
+' }';
+
+// given that hit is a point on the extruded rectangle, what is the surface
+// normal? The hit is either on one of the two flat ends or on the swept side,
+// and the side normal points away from the box the shape is the sweep of (that
+// covers the flat side faces too, where the offset points straight out of a
+// face). Both candidates are measured relative to their own extent so that the
+// choice does not depend on the scale of the shape.
+var normalForExtrudedRectangleSource =
+' vec3 normalForExtrudedRectangle(vec3 hit, vec3 boxMin, vec3 boxMax, float radius, vec3 axis) {' +
+'   vec3 center = (boxMin + boxMax) * 0.5;' +
+'   vec3 halfSize = max((boxMax - boxMin) * 0.5, vec3(' + epsilon + '));' +
+'   vec3 u = axis.zxy;' +
+'   vec3 v = axis.yzx;' +
+'   vec3 toHit = hit - center;' +
+
+'   vec3 inner = max(halfSize - radius * (u + v), vec3(0.0));' +
+'   vec3 offset = toHit - clamp(toHit, -inner, inner);' +
+'   float offsetLength = length(offset);' +
+    // a radius of zero leaves the sides sharp, and there is no offset to take a
+    // direction from, so the shape is just a box
+'   if(offsetLength <= ' + epsilon + ') return normalForCube(hit, boxMin, boxMax);' +
+
+'   float endRelative = abs(dot(toHit, axis)) / dot(halfSize, axis);' +
+'   float sideRelative = offsetLength / max(radius, ' + epsilon + ');' +
+'   if(endRelative > sideRelative) return axis * sign(dot(toHit, axis));' +
+'   return offset / offsetLength;' +
+' }';
+
 // compute the near intersection of a sphere
 // no intersection returns a value of +infinity
 var intersectSphereSource =
@@ -314,6 +427,10 @@ function makeTracerFragmentSource(objects) {
   concat(objects, function(o){ return o.getGlobalCode(); }) +
   intersectCubeSource +
   normalForCubeSource +
+  unionIntervalSource +
+  intersectAxisCylinderSource +
+  intersectExtrudedRectangleSource +
+  normalForExtrudedRectangleSource +
   intersectSphereSource +
   normalForSphereSource +
   randomSource +
@@ -647,6 +764,195 @@ Cube.intersect = function(origin, ray, cubeMin, cubeMax) {
     return tNear;
   }
   return Number.MAX_VALUE;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// class ExtrudedRectangle
+////////////////////////////////////////////////////////////////////////////////
+
+// A box whose cross section perpendicular to `axis` is a rectangle with rounded
+// corners, like a CSS border-radius extruded into a solid. The ends of the
+// extrusion stay flat, so only the four edges running along the axis are
+// rounded off.
+
+var AXES = { x: 0, y: 1, z: 2 };
+
+// which of x, y or z the rectangle is extruded along, as an index. Anything
+// unrecognized extrudes along z, which is the axis facing the default camera.
+function axisIndex(axis) {
+  if(typeof axis === 'number') {
+    return (axis === 0 || axis === 1 || axis === 2) ? axis : 2;
+  }
+  var index = AXES[String(axis).toLowerCase()];
+  return index === undefined ? 2 : index;
+}
+
+/**
+ * @param {Vector} minCorner - corner of the enclosing box
+ * @param {Vector} maxCorner - opposite corner of the enclosing box
+ * @param {number} borderRadius - how much the corners of the cross section are
+ *     rounded, clamped to half of the smaller side. 0 gives a plain box.
+ * @param {number} id
+ * @param {Vector} [color]
+ * @param {string|number} ['z'] axis - the axis to extrude along ('x', 'y' or 'z')
+ */
+function ExtrudedRectangle(minCorner, maxCorner, borderRadius, id, color, axis) {
+  this.minCorner = minCorner;
+  this.maxCorner = maxCorner;
+  this.axis = axisIndex(axis);
+  this.borderRadius = ExtrudedRectangle.clampRadius(borderRadius, minCorner, maxCorner, this.axis);
+  this.id = id;
+  this.color = color || Vector.create([defaultSurfaceColor, defaultSurfaceColor, defaultSurfaceColor]);
+  this.minStr = 'extrudedRectangleMin' + id;
+  this.maxStr = 'extrudedRectangleMax' + id;
+  this.radiusStr = 'extrudedRectangleRadius' + id;
+  this.colorStr = 'color' + id;
+  this.intersectStr = 'tExtrudedRectangle' + id;
+  // the axis never changes without a recompilation, so bake it into the shader
+  this.axisStr = 'vec3(' +
+      glFloat(this.axis == 0 ? 1 : 0) + ', ' +
+      glFloat(this.axis == 1 ? 1 : 0) + ', ' +
+      glFloat(this.axis == 2 ? 1 : 0) + ')';
+  this.temporaryTranslation = Vector.create([0, 0, 0]);
+}
+
+// a radius larger than half of the smaller cross section side would make the
+// rounded corners overlap and turn the shape inside out
+ExtrudedRectangle.clampRadius = function(radius, minCorner, maxCorner, axis) {
+  var size = maxCorner.subtract(minCorner).elements;
+  var maxRadius = Math.min(size[(axis + 1) % 3], size[(axis + 2) % 3]) * 0.5;
+  if(!(radius > 0)) return 0;
+  return Math.min(radius, maxRadius);
+};
+
+ExtrudedRectangle.prototype.getGlobalCode = function() {
+  return '' +
+' uniform vec3 ' + this.minStr + ';' +
+' uniform vec3 ' + this.maxStr + ';' +
+' uniform float ' + this.radiusStr + ';' +
+' uniform vec3 ' + this.colorStr + ';';
+};
+
+ExtrudedRectangle.prototype.getIntersectCode = function() {
+  return '' +
+' vec2 ' + this.intersectStr + ' = intersectExtrudedRectangle(origin, ray, ' + this.minStr + ', ' + this.maxStr + ', ' + this.radiusStr + ', ' + this.axisStr + ');';
+};
+
+ExtrudedRectangle.prototype.getShadowTestCode = function() {
+  return '' +
+  this.getIntersectCode() +
+' if(' + this.intersectStr + '.x > ' + epsilon + ' && ' + this.intersectStr + '.x < 1.0 && ' + this.intersectStr + '.x < ' + this.intersectStr + '.y) return 0.0;';
+};
+
+ExtrudedRectangle.prototype.getMinimumIntersectCode = function() {
+  return '' +
+' if(' + this.intersectStr + '.x > 0.0 && ' + this.intersectStr + '.x < ' + this.intersectStr + '.y && ' + this.intersectStr + '.x < t) t = ' + this.intersectStr + '.x;';
+};
+
+ExtrudedRectangle.prototype.getNormalCalculationCode = function() {
+  // as for the cube, the interval has to be non empty as well, otherwise two
+  // coplanar objects would fight over the hit
+  return `
+  else if(t == ${this.intersectStr}.x && ${this.intersectStr}.x < ${this.intersectStr}.y) {
+    normal = normalForExtrudedRectangle(hit, ${this.minStr}, ${this.maxStr}, ${this.radiusStr}, ${this.axisStr});
+    surfaceColor = ${this.colorStr};
+  }`;
+};
+
+ExtrudedRectangle.prototype.setUniforms = function(renderer) {
+  renderer.uniforms[this.minStr] = this.getMinCorner();
+  renderer.uniforms[this.maxStr] = this.getMaxCorner();
+  renderer.uniforms[this.radiusStr] = this.borderRadius;
+  renderer.uniforms[this.colorStr] = this.color;
+};
+
+ExtrudedRectangle.prototype.temporaryTranslate = function(translation) {
+  this.temporaryTranslation = translation;
+};
+
+ExtrudedRectangle.prototype.translate = function(translation) {
+  this.minCorner = this.minCorner.add(translation);
+  this.maxCorner = this.maxCorner.add(translation);
+};
+
+ExtrudedRectangle.prototype.getMinCorner = function() {
+  return this.minCorner.add(this.temporaryTranslation);
+};
+
+ExtrudedRectangle.prototype.getMaxCorner = function() {
+  return this.maxCorner.add(this.temporaryTranslation);
+};
+
+ExtrudedRectangle.prototype.intersect = function(origin, ray) {
+  return ExtrudedRectangle.intersect(origin, ray, this.getMinCorner(), this.getMaxCorner(), this.borderRadius, this.axis);
+};
+
+// the same union of convex pieces as the shader does, for picking with the
+// mouse. Returns the near intersection, or Number.MAX_VALUE for a miss.
+ExtrudedRectangle.intersect = function(origin, ray, boxMin, boxMax, radius, axis) {
+  var o = origin.elements, d = ray.elements;
+  var lo = boxMin.elements, hi = boxMax.elements;
+  var u = (axis + 1) % 3, v = (axis + 2) % 3;
+
+  var near = Number.MAX_VALUE, far = -Number.MAX_VALUE;
+  function union(pieceNear, pieceFar) {
+    if(pieceNear >= pieceFar) return;
+    near = Math.min(near, pieceNear);
+    far = Math.max(far, pieceFar);
+  }
+
+  // an axis aligned box, given as [min, max] along each of the three axes
+  function unionBox(box) {
+    var boxNear = -Number.MAX_VALUE, boxFar = Number.MAX_VALUE;
+    for(var i = 0; i < 3; i++) {
+      var slab = slabInterval(o[i], d[i], box[i][0], box[i][1]);
+      if(slab === null) return;
+      boxNear = Math.max(boxNear, slab[0]);
+      boxFar = Math.min(boxFar, slab[1]);
+    }
+    union(boxNear, boxFar);
+  }
+
+  function slabInterval(originComponent, rayComponent, min, max) {
+    if(Math.abs(rayComponent) < 1e-12) {
+      return (originComponent >= min && originComponent <= max) ? [-Number.MAX_VALUE, Number.MAX_VALUE] : null;
+    }
+    var t1 = (min - originComponent) / rayComponent;
+    var t2 = (max - originComponent) / rayComponent;
+    return (t1 < t2) ? [t1, t2] : [t2, t1];
+  }
+
+  // the two boxes crossing each other in a plus shape
+  var full = [[lo[0], hi[0]], [lo[1], hi[1]], [lo[2], hi[2]]];
+  var alongU = [full[0].slice(), full[1].slice(), full[2].slice()];
+  alongU[v] = [lo[v] + radius, hi[v] - radius];
+  var alongV = [full[0].slice(), full[1].slice(), full[2].slice()];
+  alongV[u] = [lo[u] + radius, hi[u] - radius];
+  unionBox(alongU);
+  unionBox(alongV);
+
+  // the four corner cylinders, clipped to the extruded extent
+  var ends = slabInterval(o[axis], d[axis], lo[axis], hi[axis]);
+  if(ends !== null) {
+    var a = d[u] * d[u] + d[v] * d[v];
+    for(var corner = 0; corner < 4; corner++) {
+      var centerU = (corner < 2 ? hi[u] - radius : lo[u] + radius);
+      var centerV = (corner % 2 === 0 ? hi[v] - radius : lo[v] + radius);
+      var toU = o[u] - centerU, toV = o[v] - centerV;
+      var c = toU * toU + toV * toV - radius * radius;
+      if(a < 1e-24) {
+        if(c < 0) union(ends[0], ends[1]);
+        continue;
+      }
+      var b = 2 * (toU * d[u] + toV * d[v]);
+      var discriminant = b * b - 4 * a * c;
+      if(discriminant < 0) continue;
+      var root = Math.sqrt(discriminant);
+      union(Math.max((-b - root) / (2 * a), ends[0]), Math.min((-b + root) / (2 * a), ends[1]));
+    }
+  }
+
+  return (near > 0 && near < far) ? near : Number.MAX_VALUE;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1117,6 +1423,11 @@ UI.prototype.addCube = function() {
   this.renderer.setObjects(this.objects);
 };
 
+UI.prototype.addExtrudedRectangle = function() {
+  this.objects.push(new ExtrudedRectangle(Vector.create([-0.3, -0.3, -0.1]), Vector.create([0.3, 0.3, 0.1]), 0.1, nextObjectId++));
+  this.renderer.setObjects(this.objects);
+};
+
 UI.prototype.deleteSelection = function() {
   for(var i = 0; i < this.objects.length; i++) {
     if(this.renderer.selectedObject == this.objects[i]) {
@@ -1266,7 +1577,7 @@ function createContext(canvas) {
 /**
  * Initialize the path tracer on the given canvas
  * @param {HTMLCanvasElement} canvas - Canvas to render to
- * @param {Object[]} objects - Array of Sphere and Cube objects
+ * @param {Object[]} objects - Array of Sphere, Cube and ExtrudedRectangle objects
  * @param {Object} [config] - Specify: material, glossiness (0-1), environment, bounces (light bounces per ray), zoom (in distance from center), fov (field of view, in degrees), lightPosition ([x,y,z]), lightSize, lightVal (0-1)
  * @param {bool} [interactive=true] - if the user should be able to interact with the scene
  * @param {function} [log] - a function to print log messages to, defaults to console.log
@@ -1471,4 +1782,4 @@ function makePathTracer(canvas, objects, config = {}, interactive = true, log) {
 
 };
 
-export {makePathTracer, Sphere, Cube}
+export {makePathTracer, Sphere, Cube, ExtrudedRectangle}

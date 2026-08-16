@@ -26,7 +26,7 @@
  OTHER DEALINGS IN THE SOFTWARE.
 */
 
-import {Sphere, Cube} from './webgl-path-tracing.js';
+import {Sphere, Cube, ExtrudedRectangle} from './webgl-path-tracing.js';
 import {Vector} from './sylvester.src.js';
 
 function makeStacks() {
@@ -147,6 +147,25 @@ function makeSpherePyramid() {
   return objects;
 }
 
+function makeExtrudedRectangles() {
+  var objects = [];
+  let nextObjectId = 0;
+
+  // rounded plate on the floor, extruded along y
+  objects.push(new ExtrudedRectangle(Vector.create([-0.7, -1, -0.7]), Vector.create([0.7, -0.85, 0.7]), 0.3, nextObjectId++, undefined, 'y'));
+
+  // upright rounded card, extruded along z
+  objects.push(new ExtrudedRectangle(Vector.create([-0.6, -0.85, -0.08]), Vector.create([0.0, 0.15, 0.08]), 0.15, nextObjectId++, Vector.create([1.0, 0.9, 0.1]), 'z'));
+
+  // rounded bar lying on its side, extruded along x
+  objects.push(new ExtrudedRectangle(Vector.create([0.1, -0.85, -0.45]), Vector.create([0.6, -0.35, 0.05]), 0.25, nextObjectId++, Vector.create([0.1, 0.5, 1.0]), 'x'));
+
+  // a sphere for scale
+  objects.push(new Sphere(Vector.create([0.35, -0.6, 0.4]), 0.25, nextObjectId++));
+
+  return objects;
+}
+
 var XNEG = 0, XPOS = 1, YNEG = 2, YPOS = 3, ZNEG = 4, ZPOS = 5;
 
 function addRecursiveSpheresBranch(objects, center, radius, depth, dir, nextObjectId) {
@@ -170,4 +189,4 @@ function makeRecursiveSpheres() {
   return objects;
 }
 
-export { makeSphereAndCube, makeSphereColumn, makeCubeAndSpheres, makeSpherePyramid, makeRecursiveSpheres, makeStacks, makeTableAndChair };
+export { makeSphereAndCube, makeSphereColumn, makeCubeAndSpheres, makeSpherePyramid, makeRecursiveSpheres, makeStacks, makeTableAndChair, makeExtrudedRectangles };
