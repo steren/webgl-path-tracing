@@ -6,7 +6,20 @@
 
 Path tracing is a realistic lighting algorithm that simulates light bouncing around a scene. This path tracer uses WebGL for realtime performance and supports diffuse, mirrored, and glossy surfaces. The path tracer is continually rendering, so the scene will start off grainy and become smoother over time.
 
-The entire scene is dynamically compiled into a GLSL shader. Everything can be repositioned using the current shader, but any geometry or material change means a recompilation. To calculate a pixel color, a ray is shot into the scene and allowed to bounce around five times. At each bounce, the direct light incoming at that point (including shadows) is multiplied by all previous material colors and accumulated. Soft shadows are achieved by randomly jittering the light position per-pixel.
+The entire scene is dynamically compiled into a GLSL shader. Everything can be repositioned using the current shader, but any geometry or material change means a recompilation. To calculate a pixel color, a ray is shot into the scene and allowed to bounce around five times. At each bounce, the direct light incoming at that point (including shadows) is multiplied by all previous material colors and accumulated. Soft shadows come from jittering the light position per pixel at every bounce.
+
+Rather than drawing those jitters independently at random, each pixel walks a
+scrambled Halton sequence, which spreads its samples out evenly instead of
+letting them clump and leave gaps. That takes roughly two to three times fewer
+samples to reach the same amount of grain.
+
+The renderer also accumulates as many samples per animation frame as fit in a
+frame's worth of time, instead of exactly one. A scene that costs a fraction of
+a frame would otherwise spend the rest of every frame waiting for the next
+vsync, capped at the refresh rate no matter how fast the hardware is. The count
+is measured and adjusted continuously, and settles back at one sample per frame
+on hardware that a single sample already saturates. Pass `samplesPerFrame` in
+the config to pin it instead.
 
 Samples accumulate into a floating point buffer where the browser can render to
 one, so the image keeps converging instead of settling at the precision of an
