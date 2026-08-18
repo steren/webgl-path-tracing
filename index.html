@@ -72,6 +72,7 @@ a {
         material: parseInt(document.getElementById('material').value),
         glossinessFactor: document.getElementById('glossiness-factor'),
         environment: document.getElementById('environment').value,
+        projection: document.getElementById('projection').value,
       };
       const ui = makePathTracer(document.getElementById('canvas'), makeSphereColumn(), config, true, log);
 
@@ -99,6 +100,9 @@ a {
         var newEnvironment = document.getElementById('environment').value;
         ui.updateEnvironment(newEnvironment);
       };
+      document.getElementById('projection').onchange = function() {
+        ui.updateProjection(document.getElementById('projection').value);
+      };
       document.getElementById('glossiness').onchange = function() {
         var newGlossiness = parseFloat(document.getElementById('glossiness').value);
         ui.updateGlossiness(newGlossiness);
@@ -122,6 +126,7 @@ a {
     <li>Move the selection along the face of its selection box by dragging around on that face</li>
     <li>Delete the selection using the backspace key</li>
     <li>Rotate the camera by dragging the background</li>
+    <li>Switch the camera between a perspective and an orthographic projection with the "Camera" menu</li>
   </ul>
 
   <div id="main">
@@ -151,6 +156,13 @@ a {
       <select id="environment">
         <option value="cornell-yellow-blue" selected>Cornell Box - Yellow and Blue</option>
         <option value="cornell-red-green">Cornell Box - Red and Green</option>
+      </select>
+      <br>
+
+      <b>Camera:</b>
+      <select id="projection">
+        <option value="perspective" selected>Perspective</option>
+        <option value="orthographic">Orthographic</option>
       </select>
     </p>
 
