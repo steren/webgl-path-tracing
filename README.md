@@ -25,6 +25,36 @@ Samples accumulate into a floating point buffer where the browser can render to
 one, so the image keeps converging instead of settling at the precision of an
 8 bit buffer. The canvas can be any size, square or not.
 
+## Camera
+
+The camera orbits the centre of the room and can project either way:
+
+```js
+makePathTracer(canvas, objects, {projection: 'orthographic'});
+```
+
+A `perspective` camera (the default) shoots all of its rays through one point,
+so objects shrink with distance and the walls of the room converge. Pass `fov`
+to change how wide it is.
+
+An `orthographic` camera shoots parallel rays instead, so parallel edges stay
+parallel and an object is the same size wherever it sits in the room, which is
+the projection technical and isometric looking renders use. Its rays do not
+spread out with distance, so anything the view frames beyond the walls of the
+room is rays that pass the room by and hit nothing: by default the view is
+sized to the room. Pass `orthoHeight` to set the height of the view in world
+units yourself, which is what zooming means without a vanishing point (`zoom`
+only moves an orthographic camera closer, it does not change what it frames).
+
+Both are also switchable at runtime, through the object `makePathTracer()`
+returns:
+
+```js
+const ui = makePathTracer(canvas, objects);
+ui.updateProjection('orthographic');
+ui.updateOrthoHeight(1.5); // null goes back to the default framing
+```
+
 ## Shapes
 
 Three shapes are available:
