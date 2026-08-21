@@ -22,6 +22,8 @@
   "homepage": "https://webgl-path-tracing.steren.fr/",
   "module": "./webgl-path-tracing.js",
   "exports": {
-    ".": "./webgl-path-tracing.js"
+    ".": "./webgl-path-tracing.js",
+    "./path-tracer-core.js": "./path-tracer-core.js",
+    "./path-tracer-worker.js": "./path-tracer-worker.js"
   }
 }

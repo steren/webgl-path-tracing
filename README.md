@@ -25,6 +25,40 @@ Samples accumulate into a floating point buffer where the browser can render to
 one, so the image keeps converging instead of settling at the precision of an
 8 bit buffer. The canvas can be any size, square or not.
 
+## Rendering in a worker
+
+The tracing runs in a web worker, against an `OffscreenCanvas` the page hands
+over when the tracer starts. The page keeps the canvas element and its event
+listeners and nothing else.
+
+This is not just tidiness. Sizing the per-frame sample budget means knowing how
+long a frame of tracing really took, which means waiting for the GPU to catch up
+with the commands rather than for the commands to be queued, and that wait
+blocks whichever thread does it. On the main thread it blocks the page: with the
+budget aiming to fill most of a frame with tracing, scrolling, layout and
+everything else on the page have to wait for the tracer between every frame, and
+a scene heavy enough to run at a few frames a second takes the page down with
+it. In a worker it blocks nobody. Compiling the scene into a shader, which
+happens on every geometry or material change, moves off the main thread with it.
+
+Browsers without `OffscreenCanvas`, or without WebGL inside a worker, fall back
+to tracing on the main thread as before — the worker is asked whether it can
+render before the canvas is handed over, since handing it over cannot be undone.
+Pass `worker: false` to always trace on the main thread:
+
+```js
+makePathTracer(canvas, objects, {worker: false});
+```
+
+`makePathTracer()` returns a controller rather than the renderer itself, since
+the renderer is usually on the other side of a message port: `setObjects`,
+`addSphere`, `addCube`, `addExtrudedRectangle`, `selectLight`,
+`deleteSelection`, `setLightPosition`, `setLightVal`, `updateMaterial`,
+`updateEnvironment`, `updateProjection`, `updateOrthoHeight`,
+`updateGlossiness`, `renderer.pause()`, `renderer.resume()` and `dispose()`.
+Calls made before the worker has started are queued and replayed, so there is
+nothing to wait for.
+
 ## Camera
 
 The camera orbits the centre of the room and can project either way:
